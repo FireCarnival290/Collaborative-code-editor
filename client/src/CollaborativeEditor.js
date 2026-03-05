@@ -193,6 +193,44 @@ const CollaborativeEditor = () => {
     setOutput('');
   };
 
+  const downloadCode = () => {
+  // Determine file extension based on language
+  const extensions = {
+    javascript: 'js',
+    python: 'py',
+    html: 'html',
+    css: 'css',
+    java: 'java',
+    cpp: 'cpp',
+    typescript: 'ts',
+    c: 'c',
+  };
+  
+  const extension = extensions[language] || 'txt';
+  const fileName = `${documentId}.${extension}`;
+  
+  // Create a blob from the code
+  const blob = new Blob([code], { type: 'text/plain' });
+  
+  // Create a temporary download link
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  
+  // Trigger download
+  document.body.appendChild(link);
+  link.click();
+  
+  // Cleanup
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+  
+  // Add to output console
+  const timestamp = new Date().toLocaleTimeString();
+  setOutput(prev => prev + `\n[${timestamp}] ⬇️ Downloaded ${fileName}\n`);
+};
+
   const toggleOutput = () => {
     setShowOutput(!showOutput);
   };
@@ -259,6 +297,13 @@ const CollaborativeEditor = () => {
             disabled={isRunning}
           >
             {isRunning ? '⏳ Running...' : '▶ Run Code'}
+          </button>
+          <button 
+            onClick={downloadCode} 
+            className="download-button"
+            disabled={!code.trim()}
+          >
+          ⬇️ Download
           </button>
           <button 
             onClick={toggleOutput} 
